@@ -1,0 +1,11 @@
+[
+  {
+    "op": "addmerge",
+    "path": "/client/behaviors/-",
+    "value": {
+      "code": "showplayingsong"
+    },
+    "file": "game:entities/humanoid/player.json",
+    "side": "Server"
+  }
+]
