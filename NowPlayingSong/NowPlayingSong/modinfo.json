@@ -7,7 +7,7 @@
         "LoafCifer"
     ],
     "description": "Showing what song is current playing while you play the game",
-    "version": "1.0.0",
+    "version": "0.0.2",
     "dependencies": {
         "game": "1.21.0"
     }
