@@ -28,7 +28,7 @@ namespace NowPlayingSong
 
             ElementBounds imgBounds = ElementBounds.Fixed(-5, 20, 50, 50);
 
-            AssetLocation image = new AssetLocation("nowplayingsong", "textures/hud/test/note.png");
+            AssetLocation image = new AssetLocation("nowplayingsong", "textures/hud/note1.png");
 
             // Background boundaries. Again, just make it fit it's child elements, then add the text as a child element
             ElementBounds bgBounds = ElementBounds.Fill.WithFixedPadding(GuiStyle.ElementToDialogPadding);
