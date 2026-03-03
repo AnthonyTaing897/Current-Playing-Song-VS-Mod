@@ -24,11 +24,11 @@ namespace NowPlayingSong
             // Auto-sized dialog at the top left of the screen
             ElementBounds dialogBounds = ElementStdBounds.AutosizedMainDialog.WithAlignment(EnumDialogArea.LeftTop);
 
-            ElementBounds textBounds = ElementBounds.Fixed(50, 20, 210, 35);
+            ElementBounds textBounds = ElementBounds.Fixed(55, 20, 210, 35);
 
-            ElementBounds imgBounds = ElementBounds.Fixed(0, 20, 50, 50);
+            ElementBounds imgBounds = ElementBounds.Fixed(-5, 20, 50, 50);
 
-            AssetLocation image = new AssetLocation("nowplayingsong","textures/decal/test/test.png");
+            AssetLocation image = new AssetLocation("nowplayingsong", "textures/hud/test/note.png");
 
             // Background boundaries. Again, just make it fit it's child elements, then add the text as a child element
             ElementBounds bgBounds = ElementBounds.Fill.WithFixedPadding(GuiStyle.ElementToDialogPadding);
@@ -53,27 +53,30 @@ namespace NowPlayingSong
         public override void OnRenderGUI(float deltaTime)
         {
             base.OnRenderGUI(deltaTime);
-
+            GuiElementStaticText textbox = SingleComposer.GetStaticText("current song");
             IMusicTrack song = capi.CurrentMusicTrack;
-            if (song != null && song != this.currSong)
+            if (song != null && (this.songName == null || GetSong(song) != this.songName))
             {
                 this.currSong = song;
                 this.songName = GetSong(song);
 
-                GuiElementStaticText textbox = SingleComposer.GetStaticText("current song");
+                
 
-                textbox.Text = "Current Song: " + this.songName;
+                textbox.Text = "Current Song: " + this.songName.Split('.')[0];
                 textbox.AutoBoxSize();
                 SingleComposer.ReCompose();
-
             }
         }
 
         public static string GetSong(IMusicTrack song)
         {
             string[] songPath = song.Name.Split('/');
-            string[] songFile = songPath[songPath.Length - 1].Split('.');
-            return songFile[0];
+            string songFile = songPath[songPath.Length - 1];
+
+            if (songFile.Split('(',')').Length > 1)
+            { return songFile.Split('(',')')[1]; }
+
+            return songFile;
         }
     }
         public class NowPlayingSongModSystem : ModSystem
