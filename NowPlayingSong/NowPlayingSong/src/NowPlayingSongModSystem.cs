@@ -9,34 +9,39 @@ using Vintagestory.API.Server;
 namespace NowPlayingSong
 {
 
-    public class GuiDialogAnnoyingText : HudElement
+    public class PlayingSongHud : HudElement
     {
-        public override string ToggleKeyCombinationCode => "annoyingtextgui";
+        public override string ToggleKeyCombinationCode => "playingSongHudElement";
         private IMusicTrack currSong;
         private string songName = "No song has played";
-        public GuiDialogAnnoyingText(ICoreClientAPI capi) : base(capi)
+        public PlayingSongHud(ICoreClientAPI capi) : base(capi)
         {
             SetupDialog();
         }
 
         private void SetupDialog()
         {
-            // Auto-sized dialog at the center of the screen
+            // Auto-sized dialog at the top left of the screen
             ElementBounds dialogBounds = ElementStdBounds.AutosizedMainDialog.WithAlignment(EnumDialogArea.LeftTop);
 
-            // Just a simple 300x300 pixel box
-            ElementBounds textBounds = ElementBounds.Fixed(0, 20, 210, 35);
+            ElementBounds textBounds = ElementBounds.Fixed(55, 20, 210, 35);
+
+            ElementBounds imgBounds = ElementBounds.Fixed(-5, 20, 50, 50);
+
+            AssetLocation image = new AssetLocation("nowplayingsong", "textures/hud/test/note.png");
 
             // Background boundaries. Again, just make it fit it's child elements, then add the text as a child element
             ElementBounds bgBounds = ElementBounds.Fill.WithFixedPadding(GuiStyle.ElementToDialogPadding);
             bgBounds.BothSizing = ElementSizing.FitToChildren;
             bgBounds.WithChildren(textBounds);
+            bgBounds.WithChildren(imgBounds);
 
             // Lastly, create the dialog
-            SingleComposer = capi.Gui.CreateCompo("myAwesomeDialog", dialogBounds)
+            SingleComposer = capi.Gui.CreateCompo("playingSongHud", dialogBounds)
                 .AddShadedDialogBG(bgBounds)
                 .AddDialogTitleBar("Song Playing", OnTitleBarCloseClicked)
                 .AddStaticTextAutoFontSize("Current Song: " + this.songName, CairoFont.WhiteDetailText(), textBounds, "current song")
+                .AddImage(imgBounds, image)
                 .Compose()
             ;
         }
@@ -48,27 +53,30 @@ namespace NowPlayingSong
         public override void OnRenderGUI(float deltaTime)
         {
             base.OnRenderGUI(deltaTime);
-
+            GuiElementStaticText textbox = SingleComposer.GetStaticText("current song");
             IMusicTrack song = capi.CurrentMusicTrack;
-            if (song != null && song != this.currSong)
+            if (song != null && (this.songName == null || GetSong(song) != this.songName))
             {
                 this.currSong = song;
                 this.songName = GetSong(song);
 
-                GuiElementStaticText textbox = SingleComposer.GetStaticText("current song");
+                
 
-                textbox.Text = "Current Song: " + this.songName;
+                textbox.Text = "Current Song: " + this.songName.Split('.')[0];
                 textbox.AutoBoxSize();
                 SingleComposer.ReCompose();
-
             }
         }
 
         public static string GetSong(IMusicTrack song)
         {
             string[] songPath = song.Name.Split('/');
-            string[] songFile = songPath[songPath.Length - 1].Split('.');
-            return songFile[0];
+            string songFile = songPath[songPath.Length - 1];
+
+            if (songFile.Split('(',')').Length > 1)
+            { return songFile.Split('(',')')[1]; }
+
+            return songFile;
         }
     }
         public class NowPlayingSongModSystem : ModSystem
@@ -92,7 +100,7 @@ namespace NowPlayingSong
             {
                 Mod.Logger.Notification("Hello from template mod client side: " + Lang.Get("nowplayingsong:hello"));
 
-                dialog = new GuiDialogAnnoyingText(api);
+                dialog = new PlayingSongHud(api);
 
                 capi = api;
                 capi.Input.RegisterHotKey("playedsonggui", "Showing what song is being played", GlKeys.F8, HotkeyType.HelpAndOverlays);
